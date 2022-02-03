@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model PurgedServer {
+  id Int @id @default(autoincrement())
+  serverId String
+  name String
+  ownerId String
+  memberCount Int
+  premiumTier String
+  emojiCount Int
+}
+
+model Deathbringer {
+  id Int @id @default(autoincrement())
+  username String
+  userId String
+  killedServers Int
+  removedVoiceChannels Int
+  removedTextChannels Int
+}
+
+model Emojis {
+  id Int @id @default(autoincrement())
+  serverId String
+  name String
+  url String 
+}
+
+model DeathStats {
+  id Int @id @default(autoincrement())
+  servers Int @default(0)
+  kills Int @default(0)
+  textChannels Int @default(0)
+  voiceChannels Int @default(0)
+}
