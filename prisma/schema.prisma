@@ -12,28 +12,39 @@ datasource db {
 
 model PurgedServer {
   id Int @id @default(autoincrement())
-  serverId String
+  serverId String @unique
   name String
   ownerId String
   memberCount Int
   premiumTier String
   emojiCount Int
+  killerId Int
+  emojis Emojis[]
+  killer Deathbringer @relation(fields: [killerId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
 
 model Deathbringer {
   id Int @id @default(autoincrement())
   username String
   userId String
-  killedServers Int
+  killedServersCount Int
   removedVoiceChannels Int
   removedTextChannels Int
+  killedServers PurgedServer[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
 
 model Emojis {
   id Int @id @default(autoincrement())
-  serverId String
   name String
   url String 
+  serverId Int
+  server PurgedServer @relation(fields: [serverId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
 
 model DeathStats {
@@ -42,4 +53,6 @@ model DeathStats {
   kills Int @default(0)
   textChannels Int @default(0)
   voiceChannels Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
