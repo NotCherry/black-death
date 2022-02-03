@@ -1,10 +1,14 @@
-const { PrismaClient } = require("@prisma/client");
+import "dotenv/config.js";
+
+import Koa from "koa";
+import KoaRouter from "@koa/router";
+import Prisma from '@prisma/client';
+import bodyParser from "koa-bodyparser"
+
+const { PrismaClient } = Prisma;
 const prisma = new PrismaClient();
-const Koa = require("koa");
-const router = require("@koa/router")();
 const app = new Koa();
-const bodyParser = require("koa-bodyparser");
-require("dotenv").config();
+const router = new KoaRouter();
 
 const PORT = process.env.PORT || 3000
 

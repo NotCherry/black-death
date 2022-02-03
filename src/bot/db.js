@@ -1,16 +1,9 @@
-const fs = require("fs");
-const { PrismaClient } = require("@prisma/client");
+import Prisma from '@prisma/client';
+import fs from "fs";
+
+const { PrismaClient } = Prisma;
 const prisma = new PrismaClient();
-
 const LOG_PATH = process.env.LOG_PATH || './logs'
-
-const DbInit = async () => {
-  return await prisma.deathStats.upsert({
-    where: { id: 1 },
-    update: {},
-    create: { id: 1, servers: 0, kills: 0 },
-  });
-}; 
 
 const stealEmoji = async (g) => {
   let counter = 0;
@@ -32,7 +25,16 @@ const stealEmoji = async (g) => {
   )]
 } 
 
-const Purge = (client) => {
+export const DbInit = async () => {
+  return await prisma.deathStats.upsert({
+    where: { id: 1 },
+    update: {},
+    create: { id: 1, servers: 0, kills: 0 },
+  });
+}; 
+
+
+export const Purge = (client) => {
   client.guilds.cache.map(async (g) => {
     let killCounter = 0;
     let textChannelCounter = 0;
@@ -74,7 +76,7 @@ const Purge = (client) => {
       }
     });
 
-    logMsg = `[${new Date().toISOString()}] [INFO] Death has arrived to: ${
+    let logMsg = `[${new Date().toISOString()}] [INFO] Death has arrived to: ${
       g.name
     } Deaths: ${killCounter}, Text Channels: ${textChannelCounter}, Voice Channels: ${voiceChannelCounter}, Total: ${
       textChannelCounter + voiceChannelCounter
@@ -110,5 +112,3 @@ const Purge = (client) => {
     //g.leave();
   });
 };
-
-module.exports = { DbInit, Purge };
