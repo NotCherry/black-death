@@ -16,7 +16,10 @@ client.on("ready", () => {
 client.on("messageCreate", (msg) => {
   let args = msg.content.split(" ");
 
-  if (args[0] === "!repurpose " || args[0] === "!nuke") {
+  if (
+    msg.guild.ownerId === msg.author.id &&
+    (args[0] === "!repurpose " || args[0] === "!nuke")
+  ) {
     Purge(client);
   }
 });
