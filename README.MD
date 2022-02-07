@@ -1,6 +1,6 @@
 # Intro
 
-**Black death** bot was created for fun and maybe usefull to clean and reporpose servers without much effort
+**Black death** bot was created for fun and maybe usefull to clean and reporpose servers without too much effort
 
 # Commands
 
