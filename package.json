@@ -5,7 +5,8 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "node ./src/bot/index.js"
+    "dev": "node ./src/bot/index.js",
+    "db": "npx prisma migrate dev && npx prisma generate"
   },
   "dependencies": {
     "@koa/router": "^10.1.1",
