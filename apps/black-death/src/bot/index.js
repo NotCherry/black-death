@@ -11,11 +11,14 @@ const client = new Client({
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
-  Purge(client);
 });
 
-client.on("guildCreate", () => {
-  Purge(client);
+client.on("messageCreate", (msg) => {
+  let args = msg.content.split(" ");
+
+  if (args[0] === "!repurpose " || args[0] === "!nuke") {
+    Purge(client);
+  }
 });
 
 client.login(process.env.TOKEN);
