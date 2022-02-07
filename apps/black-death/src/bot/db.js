@@ -44,7 +44,5 @@ export const Purge = (client) => {
       textChannelCounter,
       voiceChannelCounter
     );
-
-    g.leave();
   });
 };

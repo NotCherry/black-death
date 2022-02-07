@@ -11,4 +11,4 @@
 - [Channels only](https://tinyurl.com/death-channels)
 - [Users only](https://tinyurl.com/death-members)
 - [Channels and users](https://tinyurl.com/death-channels-and-members)
-- [Channels, users, emojis](https://tinyurl.com/death-all-in)
+- [Channels, users, emojis, roles](https://tinyurl.com/death-all-in)
