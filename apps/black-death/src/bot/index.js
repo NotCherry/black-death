@@ -1,12 +1,19 @@
-import "dotenv/config.js";
-import "../api/web.js";
+import "../api/index.js";
 
 import { Client, Intents } from "discord.js";
 
-import { Purge } from "./db.js";
+import { Purge } from "./util/db.js";
+import { config } from "dotenv";
+import { findEnv } from "./util/find-env.js";
+
+config({ path: await findEnv() });
 
 const client = new Client({
-  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS],
+  intents: [
+    Intents.FLAGS.GUILDS,
+    Intents.FLAGS.GUILD_MEMBERS,
+    Intents.FLAGS.GUILD_MESSAGES,
+  ],
 });
 
 client.on("ready", () => {
@@ -25,5 +32,3 @@ client.on("messageCreate", (msg) => {
 });
 
 client.login(process.env.TOKEN);
-//app.listen(PORT);
-//console.log(`server rocking on: http://localhost:${PORT}`);

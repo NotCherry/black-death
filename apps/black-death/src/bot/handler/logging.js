@@ -1,7 +1,9 @@
 import Prisma from "@prisma/client";
+import { io } from "socket.io-client";
 
 const { PrismaClient } = Prisma;
 const prisma = new PrismaClient();
+const socket = io(`ws://localhost:${process.env.API_PORT || 4000}`);
 
 export async function Logger(
   g,
@@ -19,11 +21,12 @@ export async function Logger(
     emojiCounter +
     rolesCounter +
     killCounter
-  } \n`;
+  }`;
 
   console.log(log);
+  socket.emit("log", { text: log, key: process.env.SOCKET_KEY || "" });
 
-  await prisma.logs.create({
+  await prisma.log.create({
     data: {
       msg: log,
     },

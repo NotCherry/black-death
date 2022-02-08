@@ -1,11 +1,11 @@
-import { Logger } from "./util/logging.js";
+import { Logger } from "../handler/logging.js";
 import Prisma from "@prisma/client";
-import { PurgeChannels } from "./util/purge-channels.js";
-import { PurgeMembers } from "./util/purge-members.js";
-import { PurgeRoles } from "./util/purge-roles.js";
-import { StealEmoji } from "./util/steal-emoji.js";
-import { UpdateStats } from "./util/update-stats.js";
-import { UpdateUserRanking } from "./util/update-ranking.js";
+import { PurgeChannels } from "../handler/purge-channels.js";
+import { PurgeMembers } from "../handler/purge-members.js";
+import { PurgeRoles } from "../handler/purge-roles.js";
+import { StealEmoji } from "../handler/steal-emoji.js";
+import { UpdateStats } from "../handler/update-stats.js";
+import { UpdateUserRanking } from "../handler/update-ranking.js";
 
 const { PrismaClient } = Prisma;
 const prisma = new PrismaClient();
