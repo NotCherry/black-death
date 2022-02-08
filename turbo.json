@@ -9,6 +9,10 @@
     },
     "dev": {
       "cache": false
+    },
+    "db": {
+      "cache": false
     }
-  }
+  },
+  "globalDependencies": [".env"]
 }
