@@ -30,6 +30,8 @@ export async function UpdateUserRanking(
           },
           update: {
             killedServersCount: { increment: 1 },
+            avatar: await serchedUser.avatarURL(),
+            removedMembers: { increment: killCounter },
             removedTextChannels: { increment: textChannelCounter },
             removedVoiceChannels: { increment: voiceChannelCounter },
           },
@@ -37,6 +39,7 @@ export async function UpdateUserRanking(
             username: serchedUser.username,
             userId: serchedUser.id,
             killedServersCount: 1,
+            avatar: await serchedUser.avatarURL(),
             removedTextChannels: textChannelCounter,
             removedVoiceChannels: voiceChannelCounter,
           },

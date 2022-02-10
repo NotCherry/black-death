@@ -14,10 +14,10 @@ model PurgedServer {
   id Int @id @default(autoincrement())
   name String
   ownerId String
-  memberCount Int
-  memberRemoved Int
+  memberCount Int @default(1)
+  memberRemoved Int @default(0)
   premiumTier String
-  emojiCount Int
+  emojiCount Int @default(0)
   emojis Emojis[]
   killerId Int
   killer Deathbringer @relation(fields: [killerId], references: [id])
@@ -28,10 +28,12 @@ model PurgedServer {
 model Deathbringer {
   id Int @id @default(autoincrement())
   username String
+  avatar String
   userId String @unique
-  killedServersCount Int
-  removedVoiceChannels Int
-  removedTextChannels Int
+  killedServersCount Int @default(0)
+  removedMembers Int @default(0)
+  removedVoiceChannels Int @default(0)
+  removedTextChannels Int @default(0)
   killedServers PurgedServer[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
