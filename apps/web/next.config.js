@@ -2,6 +2,9 @@ const withTM = require("next-transpile-modules")(["ui"]);
 
 module.exports = withTM({
   reactStrictMode: true,
+  images: {
+    domains: ["i.pinimg.com"],
+  },
   async rewrites() {
     return [
       {
