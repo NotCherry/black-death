@@ -72,6 +72,7 @@ export async function UpdateUserRanking(
         username: "unknown",
         userId: "1",
         killedServersCount: 1,
+        avatar: "",
         removedTextChannels: textChannelCounter,
         removedVoiceChannels: voiceChannelCounter,
       },

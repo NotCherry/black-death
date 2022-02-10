@@ -48,7 +48,6 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   socket.on("log", (msg) => {
     if (msg.key === (process.env.SOCKET_KEY || "")) {
-      console.log(process.env.SOCKET_KEY);
       io.emit("log", msg.text);
     }
   });
