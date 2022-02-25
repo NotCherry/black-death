@@ -3,7 +3,7 @@ const withTM = require("next-transpile-modules")(["ui"]);
 module.exports = withTM({
   reactStrictMode: true,
   images: {
-    domains: ["i.pinimg.com"],
+    domains: ["i.pinimg.com", "cdn.discordapp.com"],
   },
   async rewrites() {
     return [

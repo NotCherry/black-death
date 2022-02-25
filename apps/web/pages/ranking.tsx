@@ -2,6 +2,7 @@ import { ReactChild, useEffect, useState } from "react";
 
 import Image from "next/image";
 import Navbar from "../components/Navbar";
+import RankingHeader from "../components/RankingHeader";
 import RankingRow from "../components/RankingRow";
 
 export default function Ranking() {
@@ -20,9 +21,9 @@ export default function Ranking() {
         <h1 className="text-5xl text-white font-bold m-10">
           THE MOST ACTIVE USERS
         </h1>
-
+        <RankingHeader />
         {ranking.map((killer, i) => (
-          <RankingRow killer={killer} key={i} />
+          <RankingRow killer={killer} i={i+1} key={"#"+i}/>
         ))}
       </div>
     </>
