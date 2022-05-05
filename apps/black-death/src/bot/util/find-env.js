@@ -1,3 +1,3 @@
 import { findUp } from "find-up";
 
-export const findEnv = async () => await findUp(".env.global");
+export const findEnv = async () => await findUp(".env.local");
