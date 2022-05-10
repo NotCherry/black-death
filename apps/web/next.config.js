@@ -9,7 +9,7 @@ module.exports = withTM({
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:4000/:path*",
+        destination: process.env.API || "http://localhost:4000/:path*",
       },
     ];
   },

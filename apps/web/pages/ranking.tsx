@@ -1,6 +1,5 @@
-import { ReactChild, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import Image from "next/image";
 import Navbar from "../components/Navbar";
 import RankingHeader from "../components/RankingHeader";
 import RankingRow from "../components/RankingRow";
@@ -23,7 +22,7 @@ export default function Ranking() {
         </h1>
         <RankingHeader />
         {ranking.map((killer, i) => (
-          <RankingRow killer={killer} i={i+1} key={"#"+i}/>
+          <RankingRow killer={killer} i={i + 1} key={"#" + i} />
         ))}
       </div>
     </>

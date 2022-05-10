@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import logo from "../static/black-death.png";
+import Logo from "../public/static/black-death.png";
 
 export default function Navbar() {
   const pages = [
@@ -26,7 +26,7 @@ export default function Navbar() {
       <div className="w-[50vw] bg-slate-300 p-6 m-3 rounded-lg shadow-lg flex justify-between">
         <div className="flex">
           <Link href="/" passHref>
-            <Image src={logo} alt="logo" />
+            <Image src={Logo} alt="logo" />
           </Link>
         </div>
         <div className="flex justify-end items-center">
